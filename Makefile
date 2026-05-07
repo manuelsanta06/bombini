@@ -1,7 +1,7 @@
 CFLAGS = -O2
 
-bombini: main.c
-	gcc $(CFLAGS) -o build/bombini main.c
+bombini: src/main.c
+	gcc $(CFLAGS) src/main.c -o build/bombini
 
 clean:
 	rm -f build/bombini

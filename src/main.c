@@ -5,6 +5,12 @@
 #include <stdbool.h>
 #include <getopt.h>
 
+#include "types.h"
+#include "loader.h"
+#include "indexer.h"
+#include "daemon.h"
+#include "search.h"
+
 void printHelp(char* name){
   printf("Uso: %s [OPCIONES]\n",name);
   printf("Opciones:\n");
