@@ -13,4 +13,8 @@ typedef struct{
   int capacity;
 }AppList;
 
+typedef struct{
+  char* desktopDirs;
+}Config;
+
 #endif

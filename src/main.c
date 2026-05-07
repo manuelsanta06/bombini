@@ -1,5 +1,4 @@
 #include <limits.h>
-#include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -54,10 +53,10 @@ int main(int argc, char** argv){
       static char defaultPath[PATH_MAX]; 
       int len=snprintf(defaultPath,sizeof(defaultPath),"%s/.config/bombini/conf.ini",home);
       if(len<0){
-        fprintf(stderr,"Error al formatear la ruta.\n");
+        fprintf(stderr,"Error parsing the path.\n");
         abort();
       }else if(len>=sizeof(defaultPath)){
-        fprintf(stderr,"Advertencia: La ruta de configuración es demasiado larga.\n");
+        fprintf(stderr,"Config path too long, aborting.\n");
         abort();
       }
       configFile=defaultPath;
@@ -66,8 +65,9 @@ int main(int argc, char** argv){
       abort();
     }
   }
+  buildAppList("/usr/share/applications/");
   if(configFile){
-    if(!daemonMode)printf("Loading plugins from: %s\n",configFile);
+    if(daemonMode)printf("Loading plugins from: %s\n",configFile);
   }
   if(daemonMode){
     printf("Running as daemon...\n");
