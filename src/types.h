@@ -2,6 +2,7 @@
 #define TYPES_H
 
 typedef struct{
+  char* filename;
   char* name;
   char* exec;
   char* icon;

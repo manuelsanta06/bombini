@@ -65,7 +65,7 @@ int main(int argc, char** argv){
       abort();
     }
   }
-  buildAppList("/usr/share/applications/");
+  buildAppList("/home/santa/.local/share/applications:/usr/share/applications/");
   if(configFile){
     if(daemonMode)printf("Loading plugins from: %s\n",configFile);
   }

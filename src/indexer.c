@@ -12,9 +12,11 @@
 
 void cleanAppEntry(AppEntry* entry){
   if(!entry)return;
+  if(entry->filename)free(entry->filename);
   if(entry->name)free(entry->name);
   if(entry->exec)free(entry->exec);
   if(entry->icon)free(entry->icon);
+  entry->filename=NULL;
   entry->name=NULL;
   entry->exec=NULL;
   entry->icon=NULL;
@@ -58,16 +60,52 @@ static char* trimString(char* str){
   return str;
 }
 
-AppList* buildAppList(const char* dirs){
-  AppList* list=calloc(1,sizeof(AppList));
-  if(!list){
-    fprintf(stderr,"Error allocating AppList\n");
-    abort();
+static void cleanExecString(char* exec){
+  if(!exec)return;
+  for(int i=0;exec[i]!='\0';i++){
+    if(exec[i]=='%'){
+      bool spaceBefore=(i>0&&isspace((unsigned char)exec[i-1]));
+      bool letterAfter=isalpha((unsigned char)exec[i+1]);
+      bool spaceOrNullAfter=false;
+      if(letterAfter){
+        char after=exec[i+2];
+        spaceOrNullAfter=(after=='\0'||isspace((unsigned char)after));
+      }
+      if(spaceBefore&&letterAfter&&spaceOrNullAfter){
+        exec[i]=' ';
+        exec[i+1]=' ';
+      }
+    }
   }
+  size_t len=strlen(exec);
+  while(len>0&&isspace((unsigned char)exec[len-1])){
+    len--;
+    exec[len]='\0';
+  }
+}
+
+AppList* buildAppList(const char* colonSeparatedDirs){
+  AppList* list=calloc(1,sizeof(AppList));
+  if(!list)abort();
   growAppList(list);
+  char* dirsCopy=strdup(colonSeparatedDirs);
+  if(!dirsCopy)abort();
+
+  char* saveptr;
+  char* token=strtok_r(dirsCopy,":",&saveptr);
+  while(token!=NULL){
+    indexDirectory(list,token);
+    token=strtok_r(NULL,":",&saveptr); 
+  }
+  free(dirsCopy);
+  return list;
+}
+
+void indexDirectory(AppList* list,const char* dir){
+  if(!list)abort();
   struct dirent *entry;
-  DIR* dp=opendir(dirs);
-  if(!dp)return list;
+  DIR* dp=opendir(dir);
+  if(!dp)return;
   while((entry=readdir(dp))!=NULL){
     size_t len=strlen(entry->d_name);
     if(entry->d_name[0]=='.'||
@@ -75,13 +113,14 @@ AppList* buildAppList(const char* dirs){
       strcmp(entry->d_name+(len-8),".desktop")!=0)
         continue;
     char fullPath[PATH_MAX];
-    snprintf(fullPath,sizeof(fullPath),"%s/%s",dirs,entry->d_name);
+    snprintf(fullPath,sizeof(fullPath),"%s/%s",dir,entry->d_name);
     FILE* deskFile=fopen(fullPath,"r");
     if(!deskFile){
       fprintf(stderr,"Error openning file %s.\n",fullPath);
       continue;
     }
     AppEntry tmp={0};
+    tmp.filename=strdup(entry->d_name);
     bool inSection=false,skip=true;
     char buffer[512];
     while(fgets(buffer,sizeof(buffer),deskFile)){
@@ -98,6 +137,7 @@ AppList* buildAppList(const char* dirs){
           tmp.name=strdup(line+5);
         }else if(!tmp.exec&&strncmp(line,"Exec=",5)==0){
           tmp.exec=strdup(line+5);
+          cleanExecString(tmp.exec);
         }else if(!tmp.icon&&strncmp(line,"Icon=",5)==0){
           tmp.icon=strdup(line+5);
         }else if(strncmp(line,"Type=Application",16)==0){
@@ -108,12 +148,25 @@ AppList* buildAppList(const char* dirs){
     if(skip||!tmp.name||!tmp.exec){
       cleanAppEntry(&tmp);
     }else{
-      list->apps[list->count]=tmp;
-      list->count++;
-      if(list->count>=list->capacity)growAppList(list);
+      bool isDuplicate=false;
+      for(int i=0;i<list->count;i++){
+        if(strcmp(list->apps[i].filename,tmp.filename)==0){
+          isDuplicate=true;
+          break;
+        }
+      }
+      //TODO: move this before the while loop
+      //TODO: add directories priority on doc
+      if(isDuplicate){
+        cleanAppEntry(&tmp);
+      }else{
+        list->apps[list->count]=tmp;
+        list->count++;
+        if(list->count>=list->capacity)growAppList(list);
+      }
     }
     fclose(deskFile);
   }
   closedir(dp);
-  return list;
+  return;
 }
