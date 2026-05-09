@@ -101,6 +101,7 @@ AppList* buildAppList(const char* colonSeparatedDirs){
   return list;
 }
 
+//TODO: hashes
 void indexDirectory(AppList* list,const char* dir){
   if(!list)abort();
   struct dirent *entry;
@@ -109,9 +110,16 @@ void indexDirectory(AppList* list,const char* dir){
   while((entry=readdir(dp))!=NULL){
     size_t len=strlen(entry->d_name);
     if(entry->d_name[0]=='.'||
-      len<8||
+      len<9||
       strcmp(entry->d_name+(len-8),".desktop")!=0)
         continue;
+    bool isDuplicate=false;
+    for(int i=0;i<list->count;i++){
+      if(strcmp(list->apps[i].filename,entry->d_name)==0){
+        isDuplicate=true;
+        break;
+      }
+    }if(isDuplicate)continue;
     char fullPath[PATH_MAX];
     snprintf(fullPath,sizeof(fullPath),"%s/%s",dir,entry->d_name);
     FILE* deskFile=fopen(fullPath,"r");
@@ -148,22 +156,10 @@ void indexDirectory(AppList* list,const char* dir){
     if(skip||!tmp.name||!tmp.exec){
       cleanAppEntry(&tmp);
     }else{
-      bool isDuplicate=false;
-      for(int i=0;i<list->count;i++){
-        if(strcmp(list->apps[i].filename,tmp.filename)==0){
-          isDuplicate=true;
-          break;
-        }
-      }
-      //TODO: move this before the while loop
       //TODO: add directories priority on doc
-      if(isDuplicate){
-        cleanAppEntry(&tmp);
-      }else{
-        list->apps[list->count]=tmp;
-        list->count++;
-        if(list->count>=list->capacity)growAppList(list);
-      }
+      list->apps[list->count]=tmp;
+      list->count++;
+      if(list->count>=list->capacity)growAppList(list);
     }
     fclose(deskFile);
   }

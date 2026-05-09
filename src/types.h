@@ -15,6 +15,7 @@ typedef struct{
 }AppList;
 
 typedef struct{
+  char* configFilePath;
   char* desktopDirs;
 }Config;
 

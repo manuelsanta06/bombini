@@ -11,11 +11,11 @@
 #include "search.h"
 
 void printHelp(char* name){
-  printf("Uso: %s [OPCIONES]\n",name);
-  printf("Opciones:\n");
-  printf("  -d, --daemon         Ejecutar como daemon en segundo plano\n");
-  printf("  -c, --config FILE    Ruta al archivo de configuración\n");
-  printf("  -h, --help           Muestra este mensaje de ayuda\n");
+  printf("Usage: %s [OPCIONES]\n",name);
+  printf("Options:\n");
+  printf("  -d, --daemon         work as a daemon for following ejecutions\n");
+  printf("  -c, --config FILE    Config file path\n");
+  printf("  -h, --help           shows this help message\n");
 }
 
 int main(int argc, char** argv){
@@ -65,14 +65,16 @@ int main(int argc, char** argv){
       abort();
     }
   }
-  buildAppList("/home/santa/.local/share/applications:/usr/share/applications/");
+  Config* conf=malloc(sizeof(Config));
+  conf->desktopDirs="/home/santa/.local/share/applications:/usr/share/applications/";
+  AppList* list=buildAppList(conf->desktopDirs);
   if(configFile){
     if(daemonMode)printf("Loading plugins from: %s\n",configFile);
   }
   if(daemonMode){
     printf("Running as daemon...\n");
-    return 0;
+  }else{
   }
-
+  freeAppList(list);
   return 0;
 }
