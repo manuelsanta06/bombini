@@ -11,7 +11,7 @@
 #include "search.h"
 
 void printHelp(char* name){
-  printf("Usage: %s [OPCIONES]\n",name);
+  printf("Usage: %s [OPTION]... [QUERY]\n",name);
   printf("Options:\n");
   printf("  -d, --daemon         work as a daemon for following ejecutions\n");
   printf("  -c, --config FILE    Config file path\n");
@@ -74,6 +74,14 @@ int main(int argc, char** argv){
   if(daemonMode){
     printf("Running as daemon...\n");
   }else{
+    if(optind>=argc){
+      fprintf(stderr,"Error: No query provided for direct search.\n");
+      abort();
+    }
+    char* query=argv[optind];
+    printf("Searching for: %s\n",query);
+    // char* results=executeSearch(query,list);
+    // printf("%s\n",results);
   }
   freeAppList(list);
   return 0;
