@@ -79,9 +79,8 @@ int main(int argc, char** argv){
       abort();
     }
     char* query=argv[optind];
-    printf("Searching for: %s\n",query);
-    // char* results=executeSearch(query,list);
-    // printf("%s\n",results);
+    char* results=executeSearch(query,list);
+    printf("%s\n",results);
   }
   freeAppList(list);
   return 0;

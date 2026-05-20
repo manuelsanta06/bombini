@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-O2 -Wall -Wextra -Isrc
-SRCS=src/main.c src/loader.c src/indexer.c src/search.c src/daemon.c
+SRCS=src/main.c src/loader.c src/indexer.c src/search.c src/daemon.c src/fuzzy_match.c
 OBJS=$(SRCS:src/%.c=build/%.o)
 TARGET=build/bombini
 
