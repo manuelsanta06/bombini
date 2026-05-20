@@ -56,7 +56,7 @@ char* executeSearch(const char* query,AppList* list){
     free(safeName);
     free(safeExec);
     free(safeIcon);
-    if(itemLen>=sizeof(item)){
+    if(itemLen<0||(size_t)itemLen>=sizeof(item)){
       fprintf(stderr,"app %s too long, skipping it.\n",results[i].app->name);
       continue;
     }

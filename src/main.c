@@ -55,7 +55,7 @@ int main(int argc, char** argv){
       if(len<0){
         fprintf(stderr,"Error parsing the path.\n");
         abort();
-      }else if(len>=sizeof(defaultPath)){
+      }else if((size_t)len>=sizeof(defaultPath)){
         fprintf(stderr,"Config path too long, aborting.\n");
         abort();
       }
@@ -65,23 +65,40 @@ int main(int argc, char** argv){
       abort();
     }
   }
-  Config* conf=malloc(sizeof(Config));
-  conf->desktopDirs="/home/santa/.local/share/applications:/usr/share/applications/";
-  AppList* list=buildAppList(conf->desktopDirs);
-  if(configFile){
-    if(daemonMode)printf("Loading plugins from: %s\n",configFile);
-  }
   if(daemonMode){
     printf("Running as daemon...\n");
-  }else{
-    if(optind>=argc){
-      fprintf(stderr,"Error: No query provided for direct search.\n");
-      abort();
+    Config* conf=malloc(sizeof(Config));
+    conf->desktopDirs="/home/santa/.local/share/applications:/usr/share/applications/";
+    if(configFile){
+      if(daemonMode)printf("Loading plugins from: %s\n",configFile);
     }
-    char* query=argv[optind];
-    char* results=executeSearch(query,list);
-    printf("%s\n",results);
+    AppList* list=buildAppList(conf->desktopDirs);
+
+    startDaemon(list);
+
+    freeAppList(list);
+    free(conf);
+    abort();
+  }else{
+    char* query=optind>=argc?"":argv[optind];
+    char* results=askDaemon(query);
+    if(!results){
+      printf("Fallback\n");
+      Config* conf=malloc(sizeof(Config));
+      conf->desktopDirs="/home/santa/.local/share/applications:/usr/share/applications/";
+      if(configFile){
+        if(daemonMode)printf("Loading plugins from: %s\n",configFile);
+      }
+      AppList* list=buildAppList(conf->desktopDirs);
+      results=executeSearch(query,list);
+      freeAppList(list);
+      free(conf);
+    }
+
+    if(results){
+      printf("%s\n",results);
+      free(results);
+    }
   }
-  freeAppList(list);
   return 0;
 }
