@@ -19,24 +19,33 @@ void printHelp(char* name){
 }
 
 int main(int argc, char** argv){
-  bool daemonMode=false;
-  char* configFile=NULL;
+  Config conf={0};
+  conf.desktopDirs="/home/santa/.local/share/applications:/usr/share/applications/";
   int opt;
 
   static struct option long_options[]={
-    {"daemon",no_argument,      0,'d'},
-    {"help",  no_argument,      0,'h'},
-    {"config",required_argument,0,'c'},
+    {"daemon",      0,0,'d'},
+    {"help",        0,0,'h'},
+    {"reload",      0,0,'R'},
+    {"standAlone",  0,0,'S'},
+    {"config",      1,0,'c'},
     {0,0,0,0}
   };
   int option_index=0;
-  while((opt=getopt_long(argc,argv,"dhc:",long_options,&option_index))!=-1){
+  while((opt=getopt_long(argc,argv,"dhc:RS",long_options,&option_index))!=-1){
     switch(opt){
       case 'd':
-        daemonMode=true;
+        if(!conf.standAlone)conf.daemondMode=true;
         break;
       case 'c':
-        configFile=optarg;
+        conf.configFilePath=optarg;
+        break;
+      case 'S':
+        if(!conf.daemondMode)conf.standAlone=true;
+        break;
+      case 'R':
+        reloadDaemon();
+        exit(0);
         break;
       case '?':
       case 'h':
@@ -47,52 +56,39 @@ int main(int argc, char** argv){
     }
   }
 
-  if(!configFile){
+  if(!conf.configFilePath){
     char *home=getenv("HOME");
     if(home){
       static char defaultPath[PATH_MAX]; 
       int len=snprintf(defaultPath,sizeof(defaultPath),"%s/.config/bombini/conf.ini",home);
       if(len<0){
-        fprintf(stderr,"Error parsing the path.\n");
+        fprintf(stderr,"Error parsing default config path.\n");
         abort();
       }else if((size_t)len>=sizeof(defaultPath)){
-        fprintf(stderr,"Config path too long, aborting.\n");
+        fprintf(stderr,"HOME path too long.\n");
         abort();
       }
-      configFile=defaultPath;
+      conf.configFilePath=defaultPath;
     }else{
-      fprintf(stderr,"Error getting HOME directory\n");
+      fprintf(stderr,"Error getting HOME directory for default config path\n");
       abort();
     }
   }
-  if(daemonMode){
-    printf("Running as daemon...\n");
-    Config* conf=malloc(sizeof(Config));
-    conf->desktopDirs="/home/santa/.local/share/applications:/usr/share/applications/";
-    if(configFile){
-      if(daemonMode)printf("Loading plugins from: %s\n",configFile);
-    }
-    AppList* list=buildAppList(conf->desktopDirs);
-
-    startDaemon(list);
-
-    freeAppList(list);
-    free(conf);
+  if(conf.daemondMode){
+    printf("Loading config file: %s\n",conf.configFilePath);
+    //loadConfig(conf);
+    
+    startDaemon(&conf);
     abort();
   }else{
     char* query=optind>=argc?"":argv[optind];
-    char* results=askDaemon(query);
+    char* results=NULL;
+    if(!conf.standAlone)results=askDaemon(query);
     if(!results){
-      printf("Fallback\n");
-      Config* conf=malloc(sizeof(Config));
-      conf->desktopDirs="/home/santa/.local/share/applications:/usr/share/applications/";
-      if(configFile){
-        if(daemonMode)printf("Loading plugins from: %s\n",configFile);
-      }
-      AppList* list=buildAppList(conf->desktopDirs);
+      //loadConfig(conf);
+      AppList* list=buildAppList(conf.desktopDirs);
       results=executeSearch(query,list);
       freeAppList(list);
-      free(conf);
     }
 
     if(results){

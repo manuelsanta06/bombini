@@ -6,9 +6,10 @@
 #include <sys/un.h>
 #include "types.h"
 #include "search.h"
+#include "indexer.h"
 #include "daemon.h"
 
-void startDaemon(AppList* list){
+void startDaemon(Config* conf){
   unlink(SOCKET_PATH);
   int server_fd=socket(AF_UNIX,SOCK_STREAM,0);
   if(server_fd<0)return;
@@ -22,6 +23,7 @@ void startDaemon(AppList* list){
     return;
   }
   listen(server_fd,10);
+  AppList* list=buildAppList(conf->desktopDirs);
 
   while(1){
     int client_fd=accept(server_fd,NULL,NULL);
@@ -30,15 +32,24 @@ void startDaemon(AppList* list){
     int bytesRead=read(client_fd,query,sizeof(query)-1);
     if(bytesRead>0){
       query[bytesRead]='\0';
-      printf("Searching for %s\n",query);
-      char* json=executeSearch(query,list);
-      if(json){
-        write(client_fd,json,strlen(json));
-        free(json);
+      if(strcmp(query,RELOAD_CMD)==0){
+        printf("Reload command received. Rebuilding cache...\n");
+        freeAppList(list);
+        list=buildAppList(conf->desktopDirs);
+        //loadConfig(conf);
+        write(client_fd,"OK",2); 
+      }else{
+        printf("Searching for %s\n",query);
+        char* json=executeSearch(query,list);
+        if(json){
+          write(client_fd,json,strlen(json));
+          free(json);
+        }
       }
     }
     close(client_fd);
   }
+  freeAppList(list);
   close(server_fd);
   unlink(SOCKET_PATH);
   return;
@@ -80,4 +91,14 @@ char* askDaemon(const char* query){
   }
   json[len]='\0';
   return json;
+}
+
+
+void reloadDaemon(void){
+  char* response=askDaemon(RELOAD_CMD);
+  if(response){
+    printf("Daemon recargado exitosamente.\n");
+    free(response);
+  }else
+    fprintf(stderr,"Error: El daemon no esta corriendo.\n");
 }
