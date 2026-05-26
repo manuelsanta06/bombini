@@ -6,7 +6,7 @@
 #ifndef SOCKET_PATH
 #define SOCKET_PATH "/tmp/bombini.sock"
 #endif
-#define RELOAD_CMD ":RELOAD:"
+#define RELOAD_CMD "S::RELOAD:"
 
 /*
  * Starts the daemon
@@ -18,7 +18,7 @@ void startDaemon(Config* conf);
  * Try to connect to an existing daemon
  * Return json on succces or null if no daemon exists
  */
-char* askDaemon(const char* query);
+char* askDaemon(const char* query,OutputFormat format);
 
 void reloadDaemon(void);
 

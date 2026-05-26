@@ -27,7 +27,7 @@ static char* escapeJsonStr(const char* str){
   return esc;
 }
 
-char* executeSearch(const char* query,AppList* list){
+char* executeSearch(const char* query,AppList* list,OutputFormat format){
   if(!list||!query)return NULL;
 
   SearchResult* results=malloc(sizeof(SearchResult)*list->count);
@@ -42,35 +42,46 @@ char* executeSearch(const char* query,AppList* list){
     }
   }
   qsort(results,matchCount,sizeof(SearchResult),compareResults);
-  int size=4096,len=1;
-  char* json=malloc(size);
-  if(!json)abort();
-  json[0]='[';
+  int size=4096,len=0;
+  char* output=malloc(size);
+  if(!output)abort();
+  if(format==FORMAT_JSON){
+    output[0]='[';
+    len=1;
+  }
   for(int i=0;i<matchCount;i++){
     char item[1024];
-    char* safeName=escapeJsonStr(results[i].app->name);
-    char* safeExec=escapeJsonStr(results[i].app->exec);
-    char* safeIcon=escapeJsonStr(results[i].app->icon);
-    int itemLen=snprintf(item,sizeof(item),"{\"name\":\"%s\",\"exec\":\"%s\",\"icon\":\"%s\"},",
-      safeName,safeExec,safeIcon);
-    free(safeName);
-    free(safeExec);
-    free(safeIcon);
+    int itemLen=0;
+    if(format==FORMAT_JSON){
+      char* safeName=escapeJsonStr(results[i].app->name);
+      char* safeExec=escapeJsonStr(results[i].app->exec);
+      char* safeIcon=escapeJsonStr(results[i].app->icon);
+      itemLen=snprintf(item,sizeof(item),"{\"name\":\"%s\",\"exec\":\"%s\",\"icon\":\"%s\"},",
+        safeName,safeExec,safeIcon);
+      free(safeName);
+      free(safeExec);
+      free(safeIcon);
+    }else{
+      itemLen=snprintf(item,sizeof(item),"%s\t%s\t%s\n",
+        results[i].app->name,results[i].app->exec,results[i].app->icon?results[i].app->icon:"");
+    }
     if(itemLen<0||(size_t)itemLen>=sizeof(item)){
       fprintf(stderr,"app %s too long, skipping it.\n",results[i].app->name);
       continue;
     }
     if(len+itemLen>=size){
       size=size+size/2;
-      json=realloc(json,size);
-      if(!json)abort();
+      output=realloc(output,size);
+      if(!output)abort();
     }
-    memcpy(json+len,item,itemLen);
+    memcpy(output+len,item,itemLen);
     len+=itemLen;
   }
-  if(len>1)json[len-1]=']';
-  else json[len++]=']';
-  json[len]='\0';
+  if(format==FORMAT_JSON){
+    if(len>1) output[len-1]=']';
+    else output[len++]=']';
+  }
+  output[len]='\0';
   free(results);
-  return json;
+  return output;
 }

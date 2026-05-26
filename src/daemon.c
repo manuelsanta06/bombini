@@ -32,15 +32,28 @@ void startDaemon(Config* conf){
     int bytesRead=read(client_fd,query,sizeof(query)-1);
     if(bytesRead>0){
       query[bytesRead]='\0';
-      if(strcmp(query,RELOAD_CMD)==0){
+      OutputFormat format=FORMAT_JSON;
+      char* actualQuery=query;
+
+      if(query[0]=='J' && query[1]==':'){
+        format=FORMAT_JSON;
+        actualQuery=query+2;
+      }else if(query[0]=='P' && query[1]==':'){
+        format=FORMAT_PLAIN;
+        actualQuery=query+2;
+      }else if(query[0]=='S' && query[1]==':'){
+        format=FORMAT_SYS;
+        actualQuery=query+2;
+      }
+      if(format==FORMAT_SYS&&strcmp(actualQuery,RELOAD_CMD)==0){
         printf("Reload command received. Rebuilding cache...\n");
         freeAppList(list);
         list=buildAppList(conf->desktopDirs);
         //loadConfig(conf);
         write(client_fd,"OK",2); 
       }else{
-        printf("Searching for %s\n",query);
-        char* json=executeSearch(query,list);
+        printf("Searching for \"%s\", Mode %d\n",actualQuery,format);
+        char* json=executeSearch(actualQuery,list,format);
         if(json){
           write(client_fd,json,strlen(json));
           free(json);
@@ -54,20 +67,26 @@ void startDaemon(Config* conf){
   unlink(SOCKET_PATH);
   return;
 }
-char* askDaemon(const char* query){
+char* askDaemon(const char* query,OutputFormat format){
   int cli_fd=socket(AF_UNIX,SOCK_STREAM,0);
   struct sockaddr_un address;
   address.sun_family=AF_UNIX;
   strcpy(address.sun_path,SOCKET_PATH);
-  int returned=connect(cli_fd, (struct sockaddr*)&address, sizeof(address));
+  int returned=connect(cli_fd,(struct sockaddr*)&address,sizeof(address));
   if(returned){
     close(cli_fd);
     return NULL;
   }
-  write(cli_fd,query,strlen(query)+1);
+  char request[514];
+  char formatChar='J';
+  if(format==FORMAT_JSON)formatChar='J';
+  else if(format==FORMAT_PLAIN)formatChar='P';
+  else if(format==FORMAT_SYS)formatChar='S';
+  snprintf(request,sizeof(request),"%c:%s",formatChar,query);
+  write(cli_fd,request,strlen(request)+1);
   int size=4096,len=0;
-  char* json=malloc(size);
-  if(!json){
+  char* output=malloc(size);
+  if(!output){
     close(cli_fd);
     return NULL;
   }
@@ -75,27 +94,27 @@ char* askDaemon(const char* query){
   while((returned=read(cli_fd,buffer,sizeof(buffer)))>0){
     if(len+returned+1>=size){
       size=size+size/2;
-      json=realloc(json,size);
-      if(!json){
+      output=realloc(output,size);
+      if(!output){
         close(cli_fd);
         return NULL;
       }
     }
-    memcpy(json+len,buffer,returned);
+    memcpy(output+len,buffer,returned);
     len+=returned;
   }
   close(cli_fd);
   if(len==0){
-    free(json);
+    free(output);
     return NULL;
   }
-  json[len]='\0';
-  return json;
+  output[len]='\0';
+  return output;
 }
 
 
 void reloadDaemon(void){
-  char* response=askDaemon(RELOAD_CMD);
+  char* response=askDaemon(RELOAD_CMD,FORMAT_SYS);
   if(response){
     printf("Daemon recargado exitosamente.\n");
     free(response);

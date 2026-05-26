@@ -16,9 +16,16 @@ typedef struct{
   int capacity;
 }AppList;
 
+typedef enum{
+  FORMAT_SYS,
+  FORMAT_JSON,
+  FORMAT_PLAIN
+} OutputFormat;
+
 typedef struct{
   char* configFilePath;
   char* desktopDirs;
+  OutputFormat format;
   bool standAlone;
   bool daemondMode;
 }Config;

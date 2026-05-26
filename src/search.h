@@ -3,6 +3,6 @@
 
 #include "types.h"
 
-char* executeSearch(const char* query,AppList* list);
+char* executeSearch(const char* query,AppList* list,OutputFormat format);
 
 #endif

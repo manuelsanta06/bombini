@@ -22,6 +22,7 @@ void printHelp(char* name){
 
 int main(int argc, char** argv){
   Config conf={0};
+  conf.format=FORMAT_JSON;
   conf.desktopDirs="/home/santa/.local/share/applications:/usr/share/applications/";
   int opt;
 
@@ -30,11 +31,12 @@ int main(int argc, char** argv){
     {"help",        0,0,'h'},
     {"reload",      0,0,'R'},
     {"standAlone",  0,0,'S'},
+    {"plain",       0,0,'P'},
     {"config",      1,0,'c'},
     {0,0,0,0}
   };
   int option_index=0;
-  while((opt=getopt_long(argc,argv,"dhc:RS",long_options,&option_index))!=-1){
+  while((opt=getopt_long(argc,argv,"dhc:RSP",long_options,&option_index))!=-1){
     switch(opt){
       case 'd':
         if(!conf.standAlone)conf.daemondMode=true;
@@ -44,6 +46,9 @@ int main(int argc, char** argv){
         break;
       case 'S':
         if(!conf.daemondMode)conf.standAlone=true;
+        break;
+      case 'P':
+        conf.format=FORMAT_PLAIN;
         break;
       case 'R':
         reloadDaemon();
@@ -85,11 +90,11 @@ int main(int argc, char** argv){
   }else{
     char* query=optind>=argc?"":argv[optind];
     char* results=NULL;
-    if(!conf.standAlone)results=askDaemon(query);
+    if(!conf.standAlone)results=askDaemon(query,conf.format);
     if(!results){
       //loadConfig(conf);
       AppList* list=buildAppList(conf.desktopDirs);
-      results=executeSearch(query,list);
+      results=executeSearch(query,list,conf.format);
       freeAppList(list);
     }
 
