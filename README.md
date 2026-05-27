@@ -15,16 +15,18 @@ Bombini reads your system's `.desktop` files, caches them in RAM, and uses a UNI
 
 ## Building
 
-To compile the project, simply clone the repository and run `make`:
+To compile the project, simply clone the repository and run `make` :
 
 ```bash
-git clone [https://github.com/yourusername/bombini.git](https://github.com/yourusername/bombini.git)
+git clone https://github.com/yourusername/bombini.git
 cd bombini
 make
 
 ```
 
 The compiled binary will be located at `build/bombini`.
+
+or use `sudo make installe` to add it directly to '/usr/local/bin/'
 
 ## Usage
 
@@ -35,9 +37,9 @@ Bombini operates in a few different modes depending on the flags provided.
 Run Bombini in the background to index your apps and listen for queries:
 
 ```bash
-./bombini --daemon
+bombini --daemon
 # or
-./bombini -d
+bombini -d
 
 ```
 
@@ -46,7 +48,7 @@ Run Bombini in the background to index your apps and listen for queries:
 With the daemon running, pass a string to Bombini. It will act as a client, ask the daemon, and print the JSON response:
 
 ```bash
-./bombini "fire"
+bombini "fire"
 
 ```
 
@@ -55,9 +57,9 @@ With the daemon running, pass a string to Bombini. It will act as a client, ask 
 If you install a new application, tell the daemon to rebuild its cache without restarting:
 
 ```bash
-./bombini --reload
+bombini --reload
 # or
-./bombini -R
+bombini -R
 
 ```
 
@@ -67,15 +69,21 @@ If you install a new application, tell the daemon to rebuild its cache without r
 * `-S, --standAlone`: Force local search (do not attempt to connect to the daemon).
 * `-R, --reload`: Tell the running daemon to rebuild its cache.
 * `-c, --config FILE`: Specify a custom configuration file path (defaults to `~/.config/bombini/conf.ini`).
+* `-P, --PLAIN`: Plain text putput.
 * `-h, --help`: Show the help message.
 
 ## Output Format
 
-Bombini returns an array of objects formatted in standard JSON, making it trivial to parse in your frontend shell:
+By default bombini returns an array of objects formatted in standard JSON, making it trivial to parse in most frontend shells:
 ```json
 [
   {"name":"Firefox Web Browser","exec":"firefox","icon":"firefox"},
   {"name":"Firewall Configuration","exec":"firewall-config","icon":"firewall-applet"}
 ]
+```
+Alternatively, you can use the '--plain' flag for an easier to parse tab-separated output:
+```txt
+Firefox Web Browser\tfirefox\tfirefox
+Firewall Configuration\tfirewall-config\tfirewall-applet
 ```
 (TODO: return real icon paths instead of its name)
