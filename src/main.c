@@ -13,11 +13,12 @@
 void printHelp(char* name){
   printf("Usage: %s [OPTION]... [QUERY]\n",name);
   printf("Options:\n");
-  printf("  -h, --help           shows this help message\n");
-  printf("  -d, --daemon         work as a daemon for following ejecutions\n");
-  printf("  -d, --reload         tells any running daemon to reload its configuration file and apps list\n");
-  printf("  -d, --standAlone     searchs the given query without trying to connect with a daemon\n");
-  printf("  -c, --config FILE    Config file path\n");
+  printf("  -h, --help          shows this help message\n");
+  printf("  -d, --daemon        work as a daemon for following ejecutions\n");
+  printf("  -S, --standAlone    searchs the given query without trying to connect with a daemon\n");
+  printf("  -R, --reload        tells any running daemon to reload its configuration file and apps list\n");
+  printf("  -P, --plain         plain text output\n");
+  printf("  -c, --config FILE   Config file path\n");
 }
 
 int main(int argc, char** argv){
