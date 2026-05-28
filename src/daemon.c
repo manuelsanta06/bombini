@@ -49,7 +49,6 @@ void startDaemon(Config* conf){
         printf("Reload command received. Rebuilding cache...\n");
         freeAppList(list);
         list=buildAppList(conf->desktopDirs);
-        //loadConfig(conf);
         write(client_fd,"OK",2); 
       }else{
         printf("Searching for \"%s\", Mode %d\n",actualQuery,format);

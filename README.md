@@ -68,8 +68,9 @@ bombini -R
 * `-d, --daemon`: Start the background server.
 * `-S, --standAlone`: Force local search (do not attempt to connect to the daemon).
 * `-R, --reload`: Tell the running daemon to rebuild its cache.
-* `-c, --config FILE`: Specify a custom configuration file path (defaults to `~/.config/bombini/conf.ini`).
 * `-P, --PLAIN`: Plain text putput.
+* `-c, --setPath PATH`: override .desktop files path. use : between paths for more than one.
+* `-c, --addPath PATH`: Concatenate a path for .desktop's. use : between paths for more than one.
 * `-h, --help`: Show the help message.
 
 ## Output Format
@@ -86,4 +87,4 @@ Alternatively, you can use the '--plain' flag for an easier to parse tab-separat
 Firefox Web Browser\tfirefox\tfirefox
 Firewall Configuration\tfirewall-config\tfirewall-applet
 ```
-(TODO: return real icon paths instead of its name)
+(TODO: option for real icon paths instead of its name)

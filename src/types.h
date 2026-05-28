@@ -23,7 +23,6 @@ typedef enum{
 } OutputFormat;
 
 typedef struct{
-  char* configFilePath;
   char* desktopDirs;
   OutputFormat format;
   bool standAlone;
