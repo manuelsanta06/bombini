@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+
 #include "types.h"
 #include "search.h"
 #include "indexer.h"

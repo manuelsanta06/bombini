@@ -6,7 +6,6 @@
 #include <getopt.h>
 
 #include "types.h"
-#include "loader.h"
 #include "indexer.h"
 #include "daemon.h"
 #include "search.h"
@@ -31,7 +30,7 @@ int main(int argc, char** argv){
     static char defaultPath[PATH_MAX]; 
     int len=snprintf(defaultPath,sizeof(defaultPath),"%s/.local/share/applications:/usr/share/applications/",home);
     if(len<0){
-      fprintf(stderr,"Error parsing default config path.\n");
+      fprintf(stderr,"Error parsing default .desktop's path\n");
       abort();
     }else if((size_t)len>=sizeof(defaultPath)){
       fprintf(stderr,"HOME path too long.\n");
@@ -40,7 +39,7 @@ int main(int argc, char** argv){
     conf.desktopDirs=strdup(defaultPath);
   }else{
     fprintf(stderr,"Error getting HOME directory for default .desktop's path\n");
-    abort();
+    exit(1);
   }
 
   int opt;
@@ -73,7 +72,7 @@ int main(int argc, char** argv){
         size_t oldLen=strlen(conf.desktopDirs);
         size_t appendLen=strlen(optarg);
         conf.desktopDirs=realloc(conf.desktopDirs,oldLen+appendLen+2);
-        if(!conf.desktopDirs)abort();
+        if(!conf.desktopDirs)exit(1);
         conf.desktopDirs[oldLen]=':';
         memcpy(conf.desktopDirs+oldLen+1,optarg,appendLen+1);
         break;
