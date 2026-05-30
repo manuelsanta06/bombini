@@ -96,8 +96,7 @@ int main(int argc, char** argv){
   }
 
   if(conf.daemonMode){
-    startDaemon(&conf);
-    exit(1);
+    exit(startDaemon(&conf));
   }else{
     char* query=optind>=argc?"":argv[optind];
     char* results=NULL;

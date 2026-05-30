@@ -12,7 +12,7 @@
  * Starts the daemon
  * Return on error
  */
-void startDaemon(Config* conf);
+int startDaemon(Config* conf);
 
 /*
  * Try to connect to an existing daemon

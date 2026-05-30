@@ -92,10 +92,10 @@ AppList* buildAppList(const char* colonSeparatedDirs){
   if(!dirsCopy)abort();
 
   char* saveptr;
-  char* token=strtok_r(dirsCopy,":",&saveptr);
-  while(token!=NULL){
-    indexDirectory(list,token);
-    token=strtok_r(NULL,":",&saveptr); 
+  char* dir=strtok_r(dirsCopy,":",&saveptr);
+  while(dir!=NULL){
+    indexDirectory(list,dir);
+    dir=strtok_r(NULL,":",&saveptr); 
   }
   free(dirsCopy);
   return list;
