@@ -156,7 +156,6 @@ void indexDirectory(AppList* list,const char* dir){
     if(skip||!tmp.name||!tmp.exec){
       cleanAppEntry(&tmp);
     }else{
-      //TODO: add directories priority on doc
       list->apps[list->count]=tmp;
       list->count++;
       if(list->count>=list->capacity)growAppList(list);

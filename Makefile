@@ -4,7 +4,7 @@ CFLAGS?=-O2
 CFLAGS+=-Wall -Wextra -Isrc
 LDFLAGS ?=
 
-SRCS=src/main.c src/loader.c src/indexer.c src/search.c src/daemon.c src/fuzzy_match.c
+SRCS=src/main.c src/indexer.c src/search.c src/daemon.c src/fuzzy_match.c
 OBJS=$(SRCS:src/%.c=build/%.o)
 TARGET=build/bombini
 

@@ -26,7 +26,7 @@ typedef struct{
   char* desktopDirs;
   OutputFormat format;
   bool standAlone;
-  bool daemondMode;
+  bool daemonMode;
 }Config;
 
 #endif

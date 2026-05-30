@@ -14,12 +14,12 @@ void printHelp(char* name){
   printf("Usage: %s [OPTION]... [QUERY]\n",name);
   printf("Options:\n");
   printf("  -h, --help          shows this help message\n");
-  printf("  -d, --daemon        work as a daemon for following ejecutions\n");
+  printf("  -d, --daemon        work as a daemon for following executions\n");
   printf("  -S, --standAlone    searchs the given query without trying to connect with a daemon\n");
   printf("  -R, --reload        tells any running daemon to reload its configuration file and apps list\n");
   printf("  -P, --plain         plain text output\n");
-  printf("  -c, --setPath PATH  override .desktop files path. use : between paths for more than one\n");
-  printf("  -c, --addPath PATH  concatenate a path for .desktop's. use : between paths for more than one\n");
+  printf("  -p, --setPath PATH  override .desktop files path. use : between paths for more than one\n");
+  printf("  -a, --addPath PATH  concatenate a path for .desktop's. use : between paths for more than one\n");
 }
 
 int main(int argc, char** argv){
@@ -59,7 +59,7 @@ int main(int argc, char** argv){
     switch(opt){
       case 'd':
         if(conf.standAlone)break;
-        conf.daemondMode=true;
+        conf.daemonMode=true;
         break;
       case 'p':
         if(conf.standAlone)break;
@@ -77,7 +77,7 @@ int main(int argc, char** argv){
         memcpy(conf.desktopDirs+oldLen+1,optarg,appendLen+1);
         break;
       case 'S':
-        if(!conf.daemondMode)conf.standAlone=true;
+        if(!conf.daemonMode)conf.standAlone=true;
         break;
       case 'P':
         conf.format=FORMAT_PLAIN;
@@ -95,7 +95,7 @@ int main(int argc, char** argv){
     }
   }
 
-  if(conf.daemondMode){
+  if(conf.daemonMode){
     startDaemon(&conf);
     exit(1);
   }else{
