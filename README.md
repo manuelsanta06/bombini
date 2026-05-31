@@ -4,7 +4,8 @@ An extremely fast, C-based CLI tool and daemon designed as a backend for Linux a
 
 Bombini reads your system's `.desktop` files, caches them in RAM, and uses a UNIX domain socket to provide instant fuzzy-search capabilities. It outputs clean JSON, completely decoupling the heavy lifting of file parsing and searching from your frontend UI.
 
-## Features
+Features
+--------
 
 * **Zero-Latency Searches:** The application list is kept in RAM. Searches take microseconds.
 * **Client-Server Architecture:** Runs as a background daemon using UNIX Sockets (`/tmp/bombini.sock`), preventing the CPU overhead of spawning new processes for every keystroke.
@@ -13,35 +14,46 @@ Bombini reads your system's `.desktop` files, caches them in RAM, and uses a UNI
 * **Hot Reloading:** Rebuild the application cache on the fly without killing the daemon.
 * **Fallback Mode:** Can act as a standard standalone CLI if the daemon is not running.
 
-## Building
+Installing
+------------
 
+### From source
 To compile the project, simply clone the repository and run `make` :
 
 ```bash
-git clone https://github.com/yourusername/bombini.git
+git clone https://github.com/manuelsanta06/bombini.git
 cd bombini
 make
-
 ```
 
 The compiled binary will be located at `build/bombini`.
+or use `sudo make install` to add it directly to '/usr/local/bin/'
 
-or use `sudo make installe` to add it directly to '/usr/local/bin/'
+### Package managers
 
-## Usage
+#### Arch Linux (AUR)
+The easiest way to install bombini is via the AUR:
+```bash
+    yay -S bombini
+```
+
+Usage
+-----
 
 Bombini operates in a few different modes depending on the flags provided.
 
 ### 1. Start the Daemon
+Bombini is designed to run in the background. If you installed the package, you can use the provided systemd user service
+```bash
+systemctl --user enable --now bombini
+```
 
-Run Bombini in the background to index your apps and listen for queries:
-
+Alternatively, start it manually:
 ```bash
 bombini --daemon
-# or
-bombini -d
-
 ```
+
+Not using the daemon will make the CLI create the app list on each search.
 
 ### 2. Search for an App
 
@@ -54,26 +66,27 @@ bombini "fire"
 
 ### 3. Hot Reload
 
-If you install a new application, tell the daemon to rebuild its cache without restarting:
+While Bombini features automatic reloading via inotify, you can force a cache rebuild at any time with:
 
 ```bash
 bombini --reload
-# or
-bombini -R
-
 ```
 
-### Options
+## Options
 
-* `-d, --daemon`: Start the background server.
-* `-S, --standAlone`: Force local search (do not attempt to connect to the daemon).
-* `-R, --reload`: Tell the running daemon to rebuild its cache.
-* `-P, --PLAIN`: Plain text putput.
-* `-c, --setPath PATH`: override .desktop files path. use : between paths for more than one.
-* `-c, --addPath PATH`: Concatenate a path for .desktop's. use : between paths for more than one.
-* `-h, --help`: Show the help message.
+| Flag | Long Flag | Description |
+| --- | --- | --- |
+| `-d` | `--daemon` | Start the background server. |
+| `-S` | `--standAlone` | Force local search (bypass daemon). |
+| `-R` | `--reload` | Force the running daemon to rebuild its cache. |
+| `-P` | `--plain` | Output as tab-separated plain text. |
+| `-p` | `--setPath` | Override `.desktop` files path (use `:` as separator). |
+| `-a` | `--addPath` | Append a path to the search list. |
+| `-h` | `--help` | Show help message. |
 
-## Output Format
+
+Output Format
+-------------
 
 By default bombini returns an array of objects formatted in standard JSON, making it trivial to parse in most frontend shells:
 ```json
