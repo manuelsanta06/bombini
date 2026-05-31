@@ -11,6 +11,8 @@ TARGET=build/bombini
 PREFIX ?= /usr/local
 BINDIR = $(PREFIX)/bin
 
+SYSTEMD_USER_DIR = $(PREFIX)/lib/systemd/user
+
 all: $(TARGET)
 
 $(TARGET): $(OBJS)
@@ -24,10 +26,14 @@ clean:
 	rm -f $(TARGET) build/*.o
 
 install: all
-	@echo "Instalando en $(DESTDIR)$(BINDIR)..."
+	@echo "Installing in $(DESTDIR)$(BINDIR)..."
 	install -d $(DESTDIR)$(BINDIR)
 	install -m 755 $(TARGET) $(DESTDIR)$(BINDIR)/bombini
+	@echo "Installing systemd service on $(DESTDIR)$(SYSTEMD_USER_DIR)..."
+	install -d $(DESTDIR)$(SYSTEMD_USER_DIR)
+	install -m 644 bombini.service $(DESTDIR)$(SYSTEMD_USER_DIR)/bombini.service
 
 uninstall:
-	@echo "Desinstalando de $(DESTDIR)$(BINDIR)..."
+	@echo "Uninstalling from $(DESTDIR)$(BINDIR)..."
 	rm -f $(DESTDIR)$(BINDIR)/bombini
+	rm -f $(DESTDIR)$(SYSTEMD_USER_DIR)/bombini.service
