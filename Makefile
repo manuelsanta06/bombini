@@ -1,7 +1,8 @@
 CC?=gcc
+VERSION ?= 1.0.2
 
 CFLAGS?=-O2
-CFLAGS+=-Wall -Wextra -Isrc
+CFLAGS+=-Wall -Wextra -Isrc -DVERSION=\"$(VERSION)\"
 LDFLAGS ?=
 
 SRCS=src/main.c src/indexer.c src/search.c src/daemon.c src/fuzzy_match.c

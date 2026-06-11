@@ -14,6 +14,7 @@ void printHelp(char* name){
   printf("Usage: %s [OPTION]... [QUERY]\n",name);
   printf("Options:\n");
   printf("  -h, --help          shows this help message\n");
+  printf("  -v, --version       show current version\n");
   printf("  -d, --daemon        work as a daemon for following executions\n");
   printf("  -S, --standAlone    searchs the given query without trying to connect with a daemon\n");
   printf("  -R, --reload        tells any running daemon to reload its configuration file and apps list\n");
@@ -45,18 +46,27 @@ int main(int argc, char** argv){
   int opt;
 
   static struct option long_options[]={
-    {"daemon",      0,0,'d'},
     {"help",        0,0,'h'},
-    {"reload",      0,0,'R'},
+    {"version",     0,0,'v'},
+    {"daemon",      0,0,'d'},
     {"standAlone",  0,0,'S'},
+    {"reload",      0,0,'R'},
     {"plain",       0,0,'P'},
     {"setPath",     1,0,'p'},
     {"addPath",     1,0,'a'},
     {0,0,0,0}
   };
   int option_index=0;
-  while((opt=getopt_long(argc,argv,"dhp:a:RSP",long_options,&option_index))!=-1){
+  while((opt=getopt_long(argc,argv,"dhvp:a:RSP",long_options,&option_index))!=-1){
     switch(opt){
+      case '?':
+      case 'h':
+        printHelp(argv[0]);
+        exit(0);
+      case 'v':
+        // Usamos la macro inyectada
+        printf("bombini v%s\n",VERSION);
+        exit(0);
       case 'd':
         if(conf.standAlone)break;
         conf.daemonMode=true;
@@ -86,10 +96,6 @@ int main(int argc, char** argv){
         reloadDaemon();
         exit(0);
         break;
-      case '?':
-      case 'h':
-        printHelp(argv[0]);
-        exit(0);
       default:
         exit(1);
     }
