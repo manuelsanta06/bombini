@@ -19,6 +19,7 @@ void printHelp(char* name){
   printf("  -S, --standAlone    searchs the given query without trying to connect with a daemon\n");
   printf("  -R, --reload        tells any running daemon to reload its configuration file and apps list\n");
   printf("  -P, --plain         plain text output\n");
+  printf("  -T, --term COMMAND  wrapper command for terminal applications\n");
   printf("  -p, --setPath PATH  override .desktop files path. use : between paths for more than one\n");
   printf("  -a, --addPath PATH  concatenate a path for .desktop's. use : between paths for more than one\n");
 }
@@ -52,12 +53,13 @@ int main(int argc, char** argv){
     {"standAlone",  0,0,'S'},
     {"reload",      0,0,'R'},
     {"plain",       0,0,'P'},
+    {"term",        1,0,'T'},
     {"setPath",     1,0,'p'},
     {"addPath",     1,0,'a'},
     {0,0,0,0}
   };
   int option_index=0;
-  while((opt=getopt_long(argc,argv,"dhvp:a:RSP",long_options,&option_index))!=-1){
+  while((opt=getopt_long(argc,argv,"dhvp:a:T:RSP",long_options,&option_index))!=-1){
     switch(opt){
       case '?':
       case 'h':
@@ -89,6 +91,11 @@ int main(int argc, char** argv){
       case 'S':
         if(!conf.daemonMode)conf.standAlone=true;
         break;
+      case 'T':
+        if(conf.terminalWrapper)free(conf.terminalWrapper);
+        conf.terminalWrapper=strdup(optarg);
+        if(!conf.terminalWrapper)exit(1);
+        break;
       case 'P':
         conf.format=FORMAT_PLAIN;
         break;
@@ -109,7 +116,7 @@ int main(int argc, char** argv){
     if(!conf.standAlone)results=askDaemon(query,conf.format);
     if(!results){
       AppList* list=buildAppList(conf.desktopDirs);
-      results=executeSearch(query,list,conf.format);
+      results=executeSearch(query,list,&conf);
       freeAppList(list);
     }
 
@@ -119,5 +126,6 @@ int main(int argc, char** argv){
     }
   }
   if(conf.desktopDirs)free(conf.desktopDirs);
+  if(conf.terminalWrapper)free(conf.terminalWrapper);
   return 0;
 }

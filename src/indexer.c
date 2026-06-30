@@ -150,6 +150,8 @@ void indexDirectory(AppList* list,const char* dir){
           tmp.icon=strdup(line+5);
         }else if(strncmp(line,"Type=Application",16)==0){
           skip=false;
+        }else if(strncmp(line,"Terminal",8)==0&&strstr(line, "true")!=NULL){
+          tmp.terminal=true;
         }
       }
     }

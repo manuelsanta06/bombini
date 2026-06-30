@@ -8,6 +8,7 @@ typedef struct{
   char* name;
   char* exec;
   char* icon;
+  bool terminal;
 }AppEntry;
 
 typedef struct{
@@ -23,6 +24,7 @@ typedef enum{
 } OutputFormat;
 
 typedef struct{
+  char* terminalWrapper;
   char* desktopDirs;
   OutputFormat format;
   bool standAlone;

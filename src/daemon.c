@@ -75,27 +75,27 @@ int startDaemon(Config* conf){
       int bytesRead=read(client_fd,query,sizeof(query)-1);
       if(bytesRead>0){
         query[bytesRead]='\0';
-        OutputFormat format=FORMAT_JSON;
+        conf->format=FORMAT_JSON;
         char* actualQuery=query;
 
         if(query[0]=='J' && query[1]==':'){
-          format=FORMAT_JSON;
+          conf->format=FORMAT_JSON;
           actualQuery=query+2;
         }else if(query[0]=='P' && query[1]==':'){
-          format=FORMAT_PLAIN;
+          conf->format=FORMAT_PLAIN;
           actualQuery=query+2;
         }else if(query[0]=='S' && query[1]==':'){
-          format=FORMAT_SYS;
+          conf->format=FORMAT_SYS;
           actualQuery=query+2;
         }
-        if(format==FORMAT_SYS&&strcmp(actualQuery,RELOAD_CMD)==0){
+        if(conf->format==FORMAT_SYS&&strcmp(actualQuery,RELOAD_CMD)==0){
           printf("Reload command received. Rebuilding cache...\n");
           freeAppList(list);
           list=buildAppList(conf->desktopDirs);
           write(client_fd,"OK",2); 
         }else{
-          printf("Searching for \"%s\", Mode %d\n",actualQuery,format);
-          char* json=executeSearch(actualQuery,list,format);
+          printf("Searching for \"%s\", Mode %d\n",actualQuery,conf->format);
+          char* json=executeSearch(actualQuery,list,conf);
           if(json){
             write(client_fd,json,strlen(json));
             free(json);

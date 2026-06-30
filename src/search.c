@@ -27,8 +27,8 @@ static char* escapeJsonStr(const char* str){
   return esc;
 }
 
-char* executeSearch(const char* query,AppList* list,OutputFormat format){
-  if(!list||!query)return NULL;
+char* executeSearch(const char* query,AppList* list,const Config* conf){
+  if(!list||!query||!conf)return NULL;
 
   SearchResult* results=malloc(sizeof(SearchResult)*list->count);
   if(!results)abort();
@@ -45,25 +45,32 @@ char* executeSearch(const char* query,AppList* list,OutputFormat format){
   int size=4096,len=0;
   char* output=malloc(size);
   if(!output)abort();
-  if(format==FORMAT_JSON){
+  if(conf->format==FORMAT_JSON){
     output[0]='[';
     len=1;
   }
   for(int i=0;i<matchCount;i++){
+    char finalExec[1024];
+    if(results[i].app->terminal&&conf->terminalWrapper){
+      snprintf(finalExec,sizeof(finalExec),"%s %s",conf->terminalWrapper,results[i].app->exec);
+    }else{
+      snprintf(finalExec,sizeof(finalExec),"%s",results[i].app->exec);
+    }
+
     char item[1024];
     int itemLen=0;
-    if(format==FORMAT_JSON){
+    if(conf->format==FORMAT_JSON){
       char* safeName=escapeJsonStr(results[i].app->name);
-      char* safeExec=escapeJsonStr(results[i].app->exec);
+      char* safeExec=escapeJsonStr(finalExec);
       char* safeIcon=escapeJsonStr(results[i].app->icon);
-      itemLen=snprintf(item,sizeof(item),"{\"name\":\"%s\",\"exec\":\"%s\",\"icon\":\"%s\"},",
-        safeName,safeExec,safeIcon);
+      itemLen=snprintf(item,sizeof(item),"{\"name\":\"%s\",\"exec\":\"%s\",\"icon\":\"%s\",\"terminal\":%s},",
+        safeName,safeExec,safeIcon,results[i].app->terminal?"true":"false");
       free(safeName);
       free(safeExec);
       free(safeIcon);
     }else{
       itemLen=snprintf(item,sizeof(item),"%s\t%s\t%s\n",
-        results[i].app->name,results[i].app->exec,results[i].app->icon?results[i].app->icon:"");
+        results[i].app->name,finalExec,results[i].app->icon?results[i].app->icon:"");
     }
     if(itemLen<0||(size_t)itemLen>=sizeof(item)){
       fprintf(stderr,"app %s too long, skipping it.\n",results[i].app->name);
@@ -77,7 +84,7 @@ char* executeSearch(const char* query,AppList* list,OutputFormat format){
     memcpy(output+len,item,itemLen);
     len+=itemLen;
   }
-  if(format==FORMAT_JSON){
+  if(conf->format==FORMAT_JSON){
     if(len>1) output[len-1]=']';
     else output[len++]=']';
   }

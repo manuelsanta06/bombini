@@ -1,5 +1,5 @@
 CC?=gcc
-VERSION ?= 1.0.2
+VERSION ?= 1.2.0
 
 CFLAGS?=-O2
 CFLAGS+=-Wall -Wextra -Isrc -DVERSION=\"$(VERSION)\"
