@@ -103,15 +103,27 @@ Output Format
 -------------
 
 By default bombini returns an array of objects formatted in standard JSON, making it trivial to parse in most frontend shells:
+`bombini --term  "kitty -e" "zen" | jq`
 ```json
 [
-  {"name":"Firefox Web Browser","exec":"firefox","icon":"firefox","terminal":true},
-  {"name":"Firewall Configuration","exec":"firewall-config","icon":"firewall-applet","terminal":true}
+  {
+    "name": "Zen Browser",
+    "exec": "/opt/zen-browser/zen",
+    "icon": "/opt/zen-browser/browser/chrome/icons/default/default128.png",
+    "terminal": false
+  },
+  {
+    "name": "Yazi File Manager",
+    "exec": "kitty -e yazi",
+    "icon": "yazi",
+    "terminal": true
+  }
 ]
 ```
 Alternatively, you can use the '--plain' flag for an easier to parse tab-separated output:
+`bombini -P --term  "kitty -e" "zen" `
 ```txt
-Firefox Web Browser\tfirefox\tfirefox
-Firewall Configuration\tfirewall-config\tfirewall-applet
+Zen Browser\t/opt/zen-browser/zen\t/opt/zen-browser/browser/chrome/icons/default/default128.png\tfalse
+Yazi File Manager\tkitty -e yazi\tyazi\ttrue
 ```
 (TODO: option for real icon paths instead of its name)
