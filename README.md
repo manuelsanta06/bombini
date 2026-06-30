@@ -13,6 +13,7 @@ Features
 * **JSON Output:** Ready to be parsed natively by JavaScript, QML, or any modern frontend.
 * **Hot Reloading:** Rebuild the application cache on the fly without killing the daemon.
 * **Fallback Mode:** Can act as a standard standalone CLI if the daemon is not running.
+* **Terminal App Support:** Intelligently handles CLI apps (`Terminal=true`) by either passing a boolean to your frontend or dynamically prepending a terminal emulator command.
 
 Installing
 ------------
@@ -72,6 +73,18 @@ While Bombini features automatic reloading via inotify, you can force a cache re
 bombini --reload
 ```
 
+### 4. Handling Terminal Apps
+
+Some `.desktop` files (like `htop` or `nvim`) are marked to run in a terminal. Bombini gives you two ways to handle this:
+
+* **Frontend Routing (Default):** The JSON output includes `"terminal": true`. You can use this boolean in your frontend (like Quickshell) to launch your terminal emulator dynamically.
+* **Backend Wrapping:** Pass a terminal wrapper to Bombini using the `-T` flag. Bombini will automatically prepend it to the `exec` string for terminal apps.
+
+```bash
+bombini -T "kitty -e" "htop"
+
+```
+
 ## Options
 
 | Flag | Long Flag | Description |
@@ -80,6 +93,7 @@ bombini --reload
 | `-S` | `--standAlone` | Force local search (bypass daemon). |
 | `-R` | `--reload` | Force the running daemon to rebuild its cache. |
 | `-P` | `--plain` | Output as tab-separated plain text. |
+| `-T` | `--term` | wrapper command for terminal applications |
 | `-p` | `--setPath` | Override `.desktop` files path (use `:` as separator). |
 | `-a` | `--addPath` | Append a path to the search list. |
 | `-h` | `--help` | Show help message. |
@@ -91,8 +105,8 @@ Output Format
 By default bombini returns an array of objects formatted in standard JSON, making it trivial to parse in most frontend shells:
 ```json
 [
-  {"name":"Firefox Web Browser","exec":"firefox","icon":"firefox"},
-  {"name":"Firewall Configuration","exec":"firewall-config","icon":"firewall-applet"}
+  {"name":"Firefox Web Browser","exec":"firefox","icon":"firefox","terminal":true},
+  {"name":"Firewall Configuration","exec":"firewall-config","icon":"firewall-applet","terminal":true}
 ]
 ```
 Alternatively, you can use the '--plain' flag for an easier to parse tab-separated output:
