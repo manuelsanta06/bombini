@@ -126,4 +126,3 @@ Alternatively, you can use the '--plain' flag for an easier to parse tab-separat
 Zen Browser\t/opt/zen-browser/zen\t/opt/zen-browser/browser/chrome/icons/default/default128.png\tfalse
 Yazi File Manager\tkitty -e yazi\tyazi\ttrue
 ```
-(TODO: option for real icon paths instead of its name)

@@ -101,7 +101,6 @@ AppList* buildAppList(const char* colonSeparatedDirs){
   return list;
 }
 
-//TODO: hashes
 void indexDirectory(AppList* list,const char* dir){
   if(!list)abort();
   struct dirent *entry;

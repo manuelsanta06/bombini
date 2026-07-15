@@ -69,8 +69,8 @@ char* executeSearch(const char* query,AppList* list,const Config* conf){
       free(safeExec);
       free(safeIcon);
     }else{
-      itemLen=snprintf(item,sizeof(item),"%s\t%s\t%s\n",
-        results[i].app->name,finalExec,results[i].app->icon?results[i].app->icon:"");
+      itemLen=snprintf(item,sizeof(item),"%s\t%s\t%s\t%s\n",
+        results[i].app->name,finalExec,results[i].app->icon?results[i].app->icon:"",results[i].app->terminal?"true":"false");
     }
     if(itemLen<0||(size_t)itemLen>=sizeof(item)){
       fprintf(stderr,"app %s too long, skipping it.\n",results[i].app->name);
