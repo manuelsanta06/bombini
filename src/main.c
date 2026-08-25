@@ -66,7 +66,6 @@ int main(int argc, char** argv){
         printHelp(argv[0]);
         exit(0);
       case 'v':
-        // Usamos la macro inyectada
         printf("bombini v%s\n",VERSION);
         exit(0);
       case 'd':

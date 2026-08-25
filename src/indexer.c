@@ -24,7 +24,7 @@ void cleanAppEntry(AppEntry* entry){
 
 void freeAppList(AppList* list){
   if(!list)return;
-  for(int i=0;i< list->count;i++)cleanAppEntry(&list->apps[i]);
+  for(size_t i=0;i<list->count;i++)cleanAppEntry(&list->apps[i]);
   if(list->apps)free(list->apps);
   list->apps=NULL;
   free(list);
@@ -113,7 +113,7 @@ void indexDirectory(AppList* list,const char* dir){
       strcmp(entry->d_name+(len-8),".desktop")!=0)
         continue;
     bool isDuplicate=false;
-    for(int i=0;i<list->count;i++){
+    for(size_t i=0;i<list->count;i++){
       if(strcmp(list->apps[i].filename,entry->d_name)==0){
         isDuplicate=true;
         break;

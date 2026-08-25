@@ -5,7 +5,9 @@
  * https://opensource.org/licenses/MIT
  */
 
-#define _GNU_SOURCE /* Required for strcasestr. */
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE/* Required for strcasestr. */
+#endif
 #include <ctype.h>
 #include <stdbool.h>
 #include <stddef.h>

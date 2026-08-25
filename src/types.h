@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
 typedef struct{
   char* filename;
@@ -13,8 +14,8 @@ typedef struct{
 
 typedef struct{
   AppEntry* apps;
-  int count;
-  int capacity;
+  size_t count;
+  size_t capacity;
 }AppList;
 
 typedef enum{

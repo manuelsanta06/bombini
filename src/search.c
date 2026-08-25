@@ -33,7 +33,7 @@ char* executeSearch(const char* query,AppList* list,const Config* conf){
   SearchResult* results=malloc(sizeof(SearchResult)*list->count);
   if(!results)abort();
   int matchCount=0;
-  for(int i=0;i<list->count;i++){
+  for(size_t i=0;i<list->count;i++){
     int32_t score=fuzzy_match(query,list->apps[i].name);
     if(score!=INT32_MIN){ 
       results[matchCount].app=&list->apps[i];

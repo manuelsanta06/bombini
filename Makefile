@@ -2,7 +2,7 @@ CC?=gcc
 VERSION ?= 1.2.0
 
 CFLAGS?=-O2
-CFLAGS+=-Wall -Wextra -Isrc -DVERSION=\"$(VERSION)\"
+CFLAGS+=-Wall -Wextra -Isrc -std=gnu11 -D_GNU_SOURCE -DVERSION=\"$(VERSION)\"
 LDFLAGS ?=
 
 SRCS=src/main.c src/indexer.c src/search.c src/daemon.c src/fuzzy_match.c
@@ -38,3 +38,5 @@ uninstall:
 	@echo "Uninstalling from $(DESTDIR)$(BINDIR)..."
 	rm -f $(DESTDIR)$(BINDIR)/bombini
 	rm -f $(DESTDIR)$(SYSTEMD_USER_DIR)/bombini.service
+
+.PHONY: all clean install uninstall test
