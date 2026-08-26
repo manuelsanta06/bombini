@@ -1,11 +1,14 @@
-#include <stdio.h>
+#include <sys/inotify.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/un.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/socket.h>
-#include <sys/un.h>
+#include <stdio.h>
+#include <errno.h>
 #include <poll.h>
-#include <sys/inotify.h>
 
 #include "types.h"
 #include "search.h"
@@ -14,19 +17,82 @@
 
 int startDaemon(Config* conf){
   //main socket fd
-  unlink(SOCKET_PATH);
-  int server_fd=socket(AF_UNIX,SOCK_STREAM,0);
-  if(server_fd<0)return 1;
-  struct sockaddr_un address;
+  int server_fd=socket(AF_UNIX,SOCK_STREAM|SOCK_CLOEXEC,0);
+  if(server_fd<0)return BOMBINI_ERROR;
+  struct sockaddr_un address={0};
   address.sun_family=AF_UNIX;
-  strcpy(address.sun_path,SOCKET_PATH);
-
-  int returned=bind(server_fd,(struct sockaddr*)&address,sizeof(address));
-  if(returned){
+  size_t socket_path_len=strlen(SOCKET_PATH);
+  if(socket_path_len>=sizeof(address.sun_path)){
+    fprintf(stderr,"Socket path is too long: %s\n",SOCKET_PATH);
     close(server_fd);
-    return 1;
+    return BOMBINI_ERROR;
   }
-  listen(server_fd,10);
+  memcpy(address.sun_path,SOCKET_PATH,socket_path_len+1);
+  socklen_t address_len=(socklen_t)(offsetof(struct sockaddr_un,sun_path)+socket_path_len+1);
+
+  if(bind(server_fd,(struct sockaddr*)&address,address_len)<0){
+    if(errno!=EADDRINUSE){
+      perror("bind");
+      close(server_fd);
+      return BOMBINI_ERROR;
+    }
+
+    int probe_fd=socket(AF_UNIX,SOCK_STREAM|SOCK_CLOEXEC,0);
+    if(probe_fd<0){
+      perror("socket");
+      close(server_fd);
+      return BOMBINI_ERROR;
+    }
+
+    if(connect(probe_fd,(struct sockaddr*)&address,address_len)==0){
+      close(probe_fd);
+      close(server_fd);
+
+      fprintf(stderr,"Bombini daemon already running.\n");
+      return BOMBINI_ALREADY_RUNNING;
+    }
+
+    int probe_error=errno;
+    close(probe_fd);
+
+    if(probe_error==ENOENT){
+      // The socket disappeared between bind() and connect().
+      return 99;
+    }else if(probe_error==ECONNREFUSED){
+      struct stat socket_info;
+      if(lstat(SOCKET_PATH,&socket_info)<0){
+        perror("lstat");
+        close(server_fd);
+        return BOMBINI_ERROR;
+      }
+      if(!S_ISSOCK(socket_info.st_mode)){
+        fprintf(stderr,"Path exists but is not a Unix socket: %s\n",SOCKET_PATH);
+        close(server_fd);
+        return BOMBINI_ERROR;
+      }
+      if(unlink(SOCKET_PATH)<0&&errno!=ENOENT){
+        perror("unlink");
+        close(server_fd);
+        return BOMBINI_ERROR;
+      }
+    }else{
+      errno=probe_error;
+      perror("connect");
+      close(server_fd);
+      return BOMBINI_ERROR;
+    }
+
+    if(bind(server_fd,(struct sockaddr*)&address,address_len)<0){
+      perror("bind");
+      close(server_fd);
+      return BOMBINI_ERROR;
+    }
+  }
+  if(listen(server_fd,10)<0){
+    perror("listen");
+    close(server_fd);
+    return BOMBINI_ERROR;
+  }
 
   //inotify fd
   int inotify_fd=inotify_init();
