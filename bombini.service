@@ -3,7 +3,7 @@ Description=Bombini Fuzzy Search Daemon
 After=graphical-session.target 
 
 [Service]
-ExecStart=/usr/bin/bombini -d
+ExecStart=/usr/local/bin/bombini -d
 Restart=on-failure
 RestartSec=2
 
